@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Payment | Lulu Ridge Rat Bakery</title>
     <link rel="stylesheet" href="styles.css" />
+    <script src="https://js.stripe.com/v3/"></script>
   </head>
   <body>
     <header class="topbar">
@@ -18,23 +19,26 @@
         <h1>PumpkinMeal Bites</h1>
         <p class="total">Total: $2.50</p>
 
-        <div class="payment-box">
-          <p>Please pay to this card:</p>
-          <div class="card-number">4031 6319 5926 8464</div>
-          <p id="payment-instructions">Send exactly $2.50 to the card number above.</p>
-        </div>
-
         <form id="payment-form" class="payment-form">
           <label>
-            Your name
-            <input type="text" name="name" placeholder="Name" required />
+            Full Name
+            <input type="text" name="name" placeholder="Full Name" required />
           </label>
 
-          <button type="submit" class="secondary-btn">I sent the payment</button>
+          <label>
+            Email
+            <input type="email" name="email" placeholder="Email" required />
+          </label>
+
+          <div id="card-element" class="card-element"></div>
+          <div id="card-errors" role="alert" class="error-message"></div>
+
+          <button type="submit" class="primary-btn" id="submit-button">Pay $2.50</button>
         </form>
       </section>
     </main>
 
     <script src="script.js"></script>
+    <script src="stripe-payment.js"></script>
   </body>
 </html>

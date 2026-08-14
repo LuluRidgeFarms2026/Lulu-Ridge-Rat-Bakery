@@ -298,6 +298,21 @@ input {
   color: var(--text);
 }
 
+.card-element {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.error-message {
+  color: #d9534f;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+}
+
 @media (max-width: 768px) {
   .hero,
   .product-card {
