@@ -4,18 +4,12 @@ const ORDER_PHONE = '5017573635';
 
 document.addEventListener('DOMContentLoaded', () => {
   const googleSignInButton = document.getElementById('google-signin');
-  const payButton = document.getElementById('pay-button');
   const quantitySelector = document.getElementById('quantity-selector');
   const quantityValue = document.getElementById('quantity-value');
   const buyButton = document.getElementById('buy-button');
   const totalElement = document.querySelector('.total');
 
-  // Handle Pay button on homepage
-  if (payButton) {
-    payButton.addEventListener('click', () => {
-      window.location.href = 'payment.html?quantity=1';
-    });
-  }
+
 
   if (window.google && window.google.accounts && googleSignInButton) {
     window.google.accounts.id.initialize({
