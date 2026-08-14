@@ -12,7 +12,9 @@
       <a class="nav-link" href="index.html">Home</a>
     </header>
 
-    <main class="page">
+    <main class="page treats-page">
+      <div class="coming-soon-banner">MORE TREATS COMING SOON!</div>
+
       <section class="product-card card">
         <div class="product-image">
           <img
@@ -24,13 +26,20 @@
         <div class="product-copy">
           <p class="eyebrow">Featured Treat</p>
           <h1>PumpkinMeal Bites (Not For Human Consumption)</h1>
-          <p class="price">$2.50</p>
+          <p class="price">$2.50 each</p>
+
+          <div class="quantity-picker">
+            <label for="quantity-selector">Quantity</label>
+            <input id="quantity-selector" type="range" min="1" max="10" value="1" />
+            <div class="quantity-readout"><span id="quantity-value">1</span> treat(s)</div>
+          </div>
+
           <ul>
             <li>Made with pumpkin and gentle ingredients</li>
             <li>Small-batch and no added sugar</li>
             <li>For rats only — not intended for people</li>
           </ul>
-          <a class="primary-btn" href="payment.html">Buy This Treat</a>
+          <a id="buy-button" class="primary-btn" href="payment.html?quantity=1">Buy This Treat</a>
         </div>
       </section>
     </main>
