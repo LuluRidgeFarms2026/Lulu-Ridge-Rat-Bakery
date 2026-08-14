@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Payment | Lulu Ridge Rat Bakery</title>
     <link rel="stylesheet" href="styles.css" />
+    <script src="https://js.stripe.com/v3/"></script>
   </head>
   <body>
     <header class="topbar">
@@ -18,7 +19,18 @@
         <h1>PumpkinMeal Bites</h1>
         <p class="total">Total: $2.50</p>
 
-        <form id="payment-form" class="payment-form">
+        <!-- Payment Method Selector -->
+        <div class="payment-method-selector">
+          <button type="button" class="method-btn active" data-method="card">
+            💳 Pay with Card
+          </button>
+          <button type="button" class="method-btn" data-method="cashapp">
+            💵 Pay with CashApp
+          </button>
+        </div>
+
+        <!-- Card Payment Form -->
+        <form id="card-payment-form" class="payment-form active-method">
           <label>
             Full Name
             <input type="text" name="name" placeholder="Full Name" required />
@@ -29,14 +41,50 @@
             <input type="email" name="email" placeholder="Email" required />
           </label>
 
-          <div id="card-errors" role="alert" class="error-message"></div>
+          <label>
+            Card Number
+            <input type="text" name="card" placeholder="1234 5678 9012 3456" maxlength="19" required />
+          </label>
 
-          <button type="submit" class="primary-btn" id="submit-button">Pay $2.50</button>
+          <div class="card-row">
+            <label>
+              Expiry
+              <input type="text" name="expiry" placeholder="MM/YY" maxlength="5" required />
+            </label>
+            <label>
+              CVV
+              <input type="text" name="cvv" placeholder="123" maxlength="4" required />
+            </label>
+          </div>
+
+          <div id="card-errors" role="alert" class="error-message"></div>
+          <button type="submit" class="primary-btn" id="card-submit-button">Pay $2.50</button>
+        </form>
+
+        <!-- CashApp Payment Form -->
+        <form id="cashapp-payment-form" class="payment-form">
+          <label>
+            Full Name
+            <input type="text" name="name" placeholder="Full Name" required />
+          </label>
+
+          <label>
+            Email
+            <input type="email" name="email" placeholder="Email" required />
+          </label>
+
+          <label>
+            CashApp Tag
+            <input type="text" name="cashapp" placeholder="$YourName" required />
+          </label>
+
+          <div id="cashapp-errors" role="alert" class="error-message"></div>
+          <button type="submit" class="primary-btn" id="cashapp-submit-button">Proceed with CashApp</button>
         </form>
       </section>
     </main>
 
     <script src="script.js"></script>
-    <script src="stripe-payment.js"></script>
+    <script src="payment-handler.js"></script>
   </body>
 </html>

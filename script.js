@@ -3,14 +3,12 @@ const PRICE_PER_TREAT = 2.5;
 const ORDER_PHONE = '5017573635';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const paymentForm = document.getElementById('payment-form');
   const googleSignInButton = document.getElementById('google-signin');
   const payButton = document.getElementById('pay-button');
   const quantitySelector = document.getElementById('quantity-selector');
   const quantityValue = document.getElementById('quantity-value');
   const buyButton = document.getElementById('buy-button');
   const totalElement = document.querySelector('.total');
-  const paymentInstructions = document.getElementById('payment-instructions');
 
   // Handle Pay button on homepage
   if (payButton) {

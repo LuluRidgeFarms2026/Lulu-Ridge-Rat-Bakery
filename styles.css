@@ -313,6 +313,55 @@ input {
   font-size: 0.95rem;
 }
 
+.payment-method-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.method-btn {
+  padding: 1rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.method-btn:hover {
+  border-color: var(--primary);
+  background: #fcf6ef;
+}
+
+.method-btn.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+.payment-form {
+  display: none;
+}
+
+.payment-form.active-method {
+  display: grid;
+}
+
+.card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.card-row label {
+  display: grid;
+  gap: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .hero,
   .product-card {
