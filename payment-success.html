@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Success | Lulu Ridge Rat Bakery</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">Lulu Ridge Rat Bakery</div>
+      <a class="nav-link" href="index.html">Back Home</a>
+    </header>
+
+    <main class="page payment-page">
+      <section class="card payment-card">
+        <p class="eyebrow">Success</p>
+        <h1>Payment received.</h1>
+        <p class="total" id="success-total">Your order is being prepared for delivery.</p>
+        <p id="success-message">
+          Thank you for supporting Lulu Ridge Rat Bakery. We’ll keep your order on file and
+          follow up with any pickup or delivery details.
+        </p>
+        <a class="primary-btn" href="index.html">Return home</a>
+      </section>
+    </main>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const total = params.get('total');
+      const quantity = params.get('quantity');
+      const name = params.get('name');
+      const orderId = params.get('orderId');
+
+      const totalEl = document.getElementById('success-total');
+      const messageEl = document.getElementById('success-message');
+
+      if (totalEl) {
+        totalEl.textContent = `Total charged: $${Number(total || 0).toFixed(2)}`;
+      }
+
+      if (messageEl) {
+        const customerName = name ? decodeURIComponent(name) : 'friend';
+        const itemLabel = Number(quantity || 1) === 1 ? 'treat' : 'treats';
+        messageEl.textContent = `Thank you, ${customerName}! Your order for ${quantity || 1} ${itemLabel} was confirmed. Order ID: ${orderId || 'N/A'}`;
+      }
+    </script>
+  </body>
+</html>

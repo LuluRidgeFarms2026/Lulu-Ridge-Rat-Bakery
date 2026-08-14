@@ -17,69 +17,21 @@
       <section class="card payment-card">
         <p class="eyebrow">Checkout</p>
         <h1>PumpkinMeal Bites</h1>
-        <p class="total">Total: $2.50</p>
+        <p class="total" id="payment-total">Total: $2.50</p>
 
-        <!-- Payment Method Selector -->
-        <div class="payment-method-selector">
-          <button type="button" class="method-btn active" data-method="card">
-            💳 Pay with Card
-          </button>
-          <button type="button" class="method-btn" data-method="cashapp">
-            💵 Pay with CashApp
-          </button>
-        </div>
-
-        <!-- Card Payment Form -->
-        <form id="card-payment-form" class="payment-form active-method">
+        <form id="checkout-form">
           <label>
             Full Name
-            <input type="text" name="name" placeholder="Full Name" required />
+            <input type="text" id="customer-name" name="name" placeholder="Full Name" required />
           </label>
 
           <label>
             Email
-            <input type="email" name="email" placeholder="Email" required />
+            <input type="email" id="customer-email" name="email" placeholder="Email" required />
           </label>
 
-          <label>
-            Card Number
-            <input type="text" name="card" placeholder="1234 5678 9012 3456" maxlength="19" required />
-          </label>
-
-          <div class="card-row">
-            <label>
-              Expiry
-              <input type="text" name="expiry" placeholder="MM/YY" maxlength="5" required />
-            </label>
-            <label>
-              CVV
-              <input type="text" name="cvv" placeholder="123" maxlength="4" required />
-            </label>
-          </div>
-
-          <div id="card-errors" role="alert" class="error-message"></div>
-          <button type="submit" class="primary-btn" id="card-submit-button">Pay $2.50</button>
-        </form>
-
-        <!-- CashApp Payment Form -->
-        <form id="cashapp-payment-form" class="payment-form">
-          <label>
-            Full Name
-            <input type="text" name="name" placeholder="Full Name" required />
-          </label>
-
-          <label>
-            Email
-            <input type="email" name="email" placeholder="Email" required />
-          </label>
-
-          <label>
-            CashApp Tag
-            <input type="text" name="cashapp" placeholder="$YourName" required />
-          </label>
-
-          <div id="cashapp-errors" role="alert" class="error-message"></div>
-          <button type="submit" class="primary-btn" id="cashapp-submit-button">Proceed with CashApp</button>
+          <div id="checkout-errors" role="alert" class="error-message"></div>
+          <button type="submit" class="primary-btn" id="checkout-submit-button">Pay</button>
         </form>
       </section>
     </main>
