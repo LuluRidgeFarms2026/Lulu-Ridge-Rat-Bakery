@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment | Lulu Ridge Rat Bakery</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">Lulu Ridge Rat Bakery</div>
+      <a class="nav-link" href="treats.html">Back to Treats</a>
+    </header>
+
+    <main class="page payment-page">
+      <section class="card payment-card">
+        <p class="eyebrow">Checkout</p>
+        <h1>PumpkinMeal Bites</h1>
+        <p class="total">Total: $2.50</p>
+
+        <div class="payment-box">
+          <p>Please pay:</p>
+          <div class="cashapp">$ElikaTacker</div>
+          <p>Send exactly $2.50 via Cash App.</p>
+        </div>
+
+        <a
+          class="primary-btn cashapp-link"
+          href="https://cash.app/$ElikaTacker"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Pay $2.50 on Cash App
+        </a>
+
+        <form id="payment-form" class="payment-form">
+          <label>
+            Your name
+            <input type="text" name="name" placeholder="Name" required />
+          </label>
+
+          <button type="submit" class="secondary-btn">I sent the payment</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
