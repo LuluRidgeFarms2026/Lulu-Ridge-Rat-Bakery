@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let quantity = Math.max(1, Math.min(10, Number(params.get('quantity') || 1)) || 1);
   let total = isSubscription ? Number(monthlyPrice) : quantity * PRICE_PER_TREAT;
   
+  console.log('Payment handler loaded:', { quantity, total, isSubscription, subscriptionType });
+  
   const apiBaseUrl = window.location.hostname === 'localhost' && window.location.port === '8000'
     ? 'http://localhost:3000'
     : '';
