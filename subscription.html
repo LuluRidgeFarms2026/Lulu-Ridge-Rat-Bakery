@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subscription | Lulu Ridge Rat Bakery</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">Lulu Ridge Rat Bakery</div>
+      <a class="nav-link" href="treats.html">Back to Treats</a>
+    </header>
+
+    <main class="page treats-page">
+      <section class="card">
+        <p class="eyebrow">Monthly Treats</p>
+        <h1>PumpkinMeal Bites Subscription</h1>
+        <p style="margin-bottom: 1.5rem;">Get treats delivered monthly and save 10% compared to one-time purchases!</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+          <div style="border: 1px solid #e0e0e0; padding: 1.5rem; border-radius: 8px;">
+            <h3 style="margin-top: 0;">Small Box</h3>
+            <p style="font-size: 1.2rem; color: #2c3e50; font-weight: 600;">2 treats / month</p>
+            <p style="font-size: 1rem; color: #7f8c8d;">Regular: $5.00</p>
+            <p style="font-size: 1.3rem; color: #27ae60; font-weight: 600;">Save with subscription: $4.50/mo</p>
+            <button class="primary-btn" data-plan="small" style="width: 100%; margin-top: 1rem;">Subscribe Now</button>
+          </div>
+
+          <div style="border: 1px solid #e0e0e0; padding: 1.5rem; border-radius: 8px;">
+            <h3 style="margin-top: 0;">Large Box</h3>
+            <p style="font-size: 1.2rem; color: #2c3e50; font-weight: 600;">5 treats / month</p>
+            <p style="font-size: 1rem; color: #7f8c8d;">Regular: $12.50</p>
+            <p style="font-size: 1.3rem; color: #27ae60; font-weight: 600;">Save with subscription: $11.25/mo</p>
+            <button class="primary-btn" data-plan="large" style="width: 100%; margin-top: 1rem;">Subscribe Now</button>
+          </div>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+          <h3 style="margin-top: 0;">How It Works</h3>
+          <ul style="margin: 0; padding-left: 1.5rem;">
+            <li>Choose your monthly treat quantity below</li>
+            <li>Complete your first payment</li>
+            <li>Get charged the same amount on the same day each month</li>
+            <li>Cancel anytime with no penalty</li>
+            <li>Save 10% compared to buying one-time treats</li>
+          </ul>
+        </div>
+
+        <a class="nav-link" href="treats.html" style="display: inline-block; margin-top: 1rem;">← Back to One-Time Purchase</a>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script src="subscription-handler.js"></script>
+  </body>
+</html>

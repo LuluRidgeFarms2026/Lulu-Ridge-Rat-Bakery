@@ -4,23 +4,41 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalElement = document.getElementById('payment-total');
   const checkoutForm = document.getElementById('checkout-form');
   const paymentInstructions = document.getElementById('payment-instructions');
-  const quantity = Math.max(1, Math.min(10, Number(new URLSearchParams(window.location.search).get('quantity') || 1)) || 1);
-  const total = quantity * PRICE_PER_TREAT;
+  const params = new URLSearchParams(window.location.search);
+  
+  const isSubscription = params.get('isSubscription') === 'true';
+  const subscriptionType = params.get('subscriptionType');
+  const monthlyPrice = params.get('monthlyPrice');
+  
+  let quantity = Math.max(1, Math.min(10, Number(params.get('quantity') || 1)) || 1);
+  let total = isSubscription ? Number(monthlyPrice) : quantity * PRICE_PER_TREAT;
+  
   const apiBaseUrl = window.location.hostname === 'localhost' && window.location.port === '8000'
     ? 'http://localhost:3000'
     : '';
 
   if (totalElement) {
-    totalElement.textContent = `Total: $${total.toFixed(2)}`;
+    if (isSubscription) {
+      totalElement.textContent = `Monthly Subscription: $${total.toFixed(2)} (10% discount applied)`;
+    } else {
+      totalElement.textContent = `Total: $${total.toFixed(2)}`;
+    }
   }
 
   if (paymentInstructions) {
-    paymentInstructions.innerHTML = 'Send the total to the Cash App account below using the payment code shown after checkout. This keeps every payment routed to one Cash App destination.';
+    if (isSubscription) {
+      paymentInstructions.innerHTML = `<strong>Subscription:</strong> Your payment will recur monthly. Send the total to the Cash App account below using the payment code shown after checkout. Cancel anytime.`;
+    } else {
+      paymentInstructions.innerHTML = 'Send the total to the Cash App account below using the payment code shown after checkout. This keeps every payment routed to one Cash App destination.';
+    }
   }
 
   const checkoutSubmitButton = document.getElementById('checkout-submit-button');
   if (checkoutSubmitButton) {
-    checkoutSubmitButton.textContent = 'PAY';
+    const buttonAmount = document.getElementById('button-amount');
+    if (buttonAmount) {
+      buttonAmount.textContent = `$${total.toFixed(2)}`;
+    }
   }
 
   if (checkoutForm) {
@@ -39,8 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       submitButton.disabled = true;
-      submitButton.textContent = 'Creating secure order...';
+      submitButton.innerHTML = 'Creating secure order...';
       errorDiv.textContent = '';
+      console.log('Starting checkout for', { name, email, paymentMethod, quantity, total, isSubscription, subscriptionType });
 
       try {
         const response = await fetch(`${apiBaseUrl}/api/create-order`, {
@@ -53,10 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
             customerName: name,
             customerEmail: email,
             paymentMethod,
+            isSubscription,
+            subscriptionType,
+            monthlyPrice: isSubscription ? total.toFixed(2) : undefined,
           }),
         });
 
         const data = await response.json();
+        console.log('Order created response:', data);
 
         if (!response.ok || !data.orderId) {
           throw new Error(data.error || 'Unable to create your secure order.');
@@ -66,15 +89,19 @@ document.addEventListener('DOMContentLoaded', () => {
           paymentInstructions.innerHTML = `
             <strong>Amount:</strong> $${Number(data.total).toFixed(2)}<br>
             <strong>Payment code:</strong> ${data.paymentCode}<br>
-            Send the full amount and include the payment code in the note.
+            Send the full amount and include the payment code in the note.${isSubscription ? '<br><strong>Note:</strong> This will recur monthly.' : ''}
           `;
         }
 
-        window.location.href = data.url;
+        console.log('Redirecting to:', data.url);
+        setTimeout(() => {
+          window.location.href = data.url;
+        }, 500);
       } catch (error) {
+        console.error('Checkout error:', error);
         errorDiv.textContent = error.message || 'Checkout is unavailable right now.';
         submitButton.disabled = false;
-        submitButton.textContent = 'PAY';
+        submitButton.innerHTML = `PAY <span id="button-amount">$${total.toFixed(2)}</span>`;
       }
     });
   }

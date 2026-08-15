@@ -25,14 +25,14 @@ app.get('/health', (req, res) => {
 });
 
 app.post('/api/create-order', (req, res) => {
-  const { quantity = 1, customerName = '', customerEmail = '', paymentMethod = 'manual' } = req.body || {};
+  const { quantity = 1, customerName = '', customerEmail = '', paymentMethod = 'manual', isSubscription = false, subscriptionType = '', monthlyPrice = '' } = req.body || {};
   const safeQuantity = Math.min(Math.max(Number(quantity) || 1, 1), 10);
 
   if (!customerName || !customerEmail) {
     return res.status(400).json({ error: 'Name and email are required.' });
   }
 
-  const total = getOrderSummary(safeQuantity);
+  const total = isSubscription ? Number(monthlyPrice) : getOrderSummary(safeQuantity);
   const orderId = `LRR-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
   const paymentCode = crypto.randomBytes(5).toString('hex').toUpperCase();
   const createdAt = new Date().toISOString();
@@ -45,6 +45,8 @@ app.post('/api/create-order', (req, res) => {
     paymentMethod,
     paymentCode,
     createdAt,
+    isSubscription,
+    subscriptionType,
   };
 
   const signature = signPayload(payload);
@@ -63,6 +65,8 @@ app.post('/api/create-order', (req, res) => {
     quantity: safeQuantity,
     paymentCode,
     paymentMethod,
+    isSubscription,
+    subscriptionType,
     signature,
     createdAt,
     expiresAt: record.expiresAt,
