@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Payment | Lulu Ridge Rat Bakery</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="https://js.stripe.com/v3/"></script>
   </head>
   <body>
     <header class="topbar">
@@ -15,7 +14,7 @@
 
     <main class="page payment-page">
       <section class="card payment-card">
-        <p class="eyebrow">Checkout</p>
+        <p class="eyebrow">Secure Local Checkout</p>
         <h1>PumpkinMeal Bites</h1>
         <p class="total" id="payment-total">Total: $2.50</p>
 
@@ -30,8 +29,18 @@
             <input type="email" id="customer-email" name="email" placeholder="Email" required />
           </label>
 
+          <label>
+            Payment Method
+            <select id="payment-method" name="paymentMethod">
+              <option value="cashapp">Cash App</option>
+              <option value="cashapp">Cash App</option>
+              <option value="cashapp">Cash App</option>
+            </select>
+          </label>
+
           <div id="checkout-errors" role="alert" class="error-message"></div>
-          <button type="submit" class="primary-btn" id="checkout-submit-button">Pay</button>
+          <div id="payment-instructions" class="info-message"></div>
+          <button type="submit" class="primary-btn" id="checkout-submit-button">PAY</button>
         </form>
       </section>
     </main>

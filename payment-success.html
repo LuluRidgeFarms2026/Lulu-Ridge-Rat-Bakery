@@ -14,35 +14,143 @@
 
     <main class="page payment-page">
       <section class="card payment-card">
-        <p class="eyebrow">Success</p>
-        <h1>Payment received.</h1>
-        <p class="total" id="success-total">Your order is being prepared for delivery.</p>
-        <p id="success-message">
-          Thank you for supporting Lulu Ridge Rat Bakery. We’ll keep your order on file and
-          follow up with any pickup or delivery details.
-        </p>
-        <a class="primary-btn" href="index.html">Return home</a>
+        <p class="eyebrow">Confirmation</p>
+        <h1>Confirm your payment</h1>
+        <p class="total" id="success-total">Your order is waiting for payment confirmation.</p>
+        <p id="success-message">Enter the payment code and confirm the exact amount sent, date, and payment note/proof.</p>
+
+        <form id="verification-form">
+          <label>
+            Payment Code
+            <input type="text" id="verification-code" name="verificationCode" placeholder="Enter your code" maxlength="20" required />
+          </label>
+
+          <label>
+            Amount Sent
+            <input type="number" id="amount-sent" name="amountSent" min="0" step="0.01" required />
+          </label>
+
+          <label>
+            Payment Date
+            <input type="date" id="payment-date" name="paymentDate" required />
+          </label>
+
+          <label>
+            Payment Note / Proof
+            <textarea id="payment-proof" name="paymentProof" rows="3" placeholder="Include the Cash App note, screenshot note, or payment proof details" required></textarea>
+          </label>
+
+          <div id="verification-errors" role="alert" class="error-message"></div>
+          <button type="submit" class="primary-btn" id="verify-button">Confirm Payment</button>
+        </form>
+
+        <a class="nav-link" href="index.html">Return home</a>
       </section>
     </main>
 
     <script>
       const params = new URLSearchParams(window.location.search);
-      const total = params.get('total');
+      const total = params.get('amount');
       const quantity = params.get('quantity');
       const name = params.get('name');
       const orderId = params.get('orderId');
+      const expectedPaymentCode = params.get('paymentCode');
+      const signature = params.get('signature');
 
       const totalEl = document.getElementById('success-total');
       const messageEl = document.getElementById('success-message');
+      const verificationForm = document.getElementById('verification-form');
+      const verificationCodeInput = document.getElementById('verification-code');
+      const amountSentInput = document.getElementById('amount-sent');
+      const paymentDateInput = document.getElementById('payment-date');
+      const paymentProofInput = document.getElementById('payment-proof');
+      const verifyButton = document.getElementById('verify-button');
+      const verificationErrors = document.getElementById('verification-errors');
 
       if (totalEl) {
-        totalEl.textContent = `Total charged: $${Number(total || 0).toFixed(2)}`;
+        totalEl.textContent = `Amount due: $${Number(total || 0).toFixed(2)}`;
       }
 
-      if (messageEl) {
-        const customerName = name ? decodeURIComponent(name) : 'friend';
-        const itemLabel = Number(quantity || 1) === 1 ? 'treat' : 'treats';
-        messageEl.textContent = `Thank you, ${customerName}! Your order for ${quantity || 1} ${itemLabel} was confirmed. Order ID: ${orderId || 'N/A'}`;
+      if (amountSentInput) {
+        amountSentInput.value = Number(total || 0).toFixed(2);
+      }
+
+      if (verificationForm) {
+        verificationForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+
+          const enteredCode = verificationCodeInput.value.trim();
+          const amountSent = Number(amountSentInput.value);
+          const paymentDate = paymentDateInput.value;
+          const paymentProof = paymentProofInput.value.trim();
+
+          if (!enteredCode) {
+            verificationErrors.textContent = 'Please enter the payment code from your payment note.';
+            return;
+          }
+
+          if (enteredCode !== expectedPaymentCode) {
+            verificationErrors.textContent = 'That payment code does not match this order.';
+            return;
+          }
+
+          if (Number.isNaN(amountSent) || amountSent !== Number(total || 0)) {
+            verificationErrors.textContent = 'The amount sent must exactly match the order total.';
+            return;
+          }
+
+          if (!paymentDate) {
+            verificationErrors.textContent = 'Please enter the date the payment was sent.';
+            return;
+          }
+
+          if (!paymentProof) {
+            verificationErrors.textContent = 'Please include the payment note or proof details.';
+            return;
+          }
+
+          verifyButton.disabled = true;
+          verifyButton.textContent = 'Confirming...';
+          verificationErrors.textContent = '';
+
+          try {
+            const response = await fetch('/api/confirm-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderId,
+                paymentCode: enteredCode,
+                signature,
+                amountSent: amountSent.toFixed(2),
+                paymentDate,
+                paymentProof,
+              }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+              throw new Error(data.error || 'Unable to confirm the payment.');
+            }
+
+            const customerName = name ? decodeURIComponent(name) : 'friend';
+            const itemLabel = Number(quantity || 1) === 1 ? 'treat' : 'treats';
+
+            if (totalEl) {
+              totalEl.textContent = `Payment confirmed: $${Number(total || 0).toFixed(2)}`;
+            }
+
+            if (messageEl) {
+              messageEl.textContent = `Thank you, ${customerName}! Your order for ${quantity || 1} ${itemLabel} is confirmed. Payment was sent on ${paymentDate}. Order ID: ${orderId || 'N/A'}`;
+            }
+
+            verificationForm.remove();
+          } catch (error) {
+            verificationErrors.textContent = error.message || 'Unable to confirm the payment.';
+            verifyButton.disabled = false;
+            verifyButton.textContent = 'Confirm Payment';
+          }
+        });
       }
     </script>
   </body>
