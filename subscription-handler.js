@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         subscriptionType: planName,
       });
 
-      window.location.href = `payment.html?${params.toString()}`;
+      window.location.href = `signin.html?${params.toString()}`;
     });
   });
 });

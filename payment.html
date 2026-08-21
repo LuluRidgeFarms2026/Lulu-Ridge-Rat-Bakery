@@ -22,12 +22,22 @@
         <form id="checkout-form">
           <label>
             Full Name
-            <input type="text" id="customer-name" name="name" placeholder="Full Name" required />
+            <input type="text" id="customer-name" name="name" placeholder="Full Name" autocomplete="name" required />
+          </label>
+
+          <label>
+            Age
+            <input type="number" id="customer-age" name="age" min="1" max="120" required />
           </label>
 
           <label>
             Email
-            <input type="email" id="customer-email" name="email" placeholder="Email" required />
+            <input type="email" id="customer-email" name="email" placeholder="Email" autocomplete="email" required />
+          </label>
+
+          <label>
+            Shipping Address
+            <textarea id="shipping-address" name="address" rows="4" autocomplete="street-address" required></textarea>
           </label>
 
           <label>

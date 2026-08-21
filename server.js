@@ -11,7 +11,39 @@ const cashAppAccounts = [
   process.env.CASHAPP_ACCOUNT_ONE || '$ElikaTacker',
   process.env.CASHAPP_ACCOUNT_TWO || '$LathanT150',
 ];
+const orderNotificationNumber = process.env.ORDER_NOTIFICATION_NUMBER || '+15017573635';
 const orders = new Map();
+
+async function sendOrderSms(order) {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const fromNumber = process.env.TWILIO_FROM_NUMBER;
+
+  if (!accountSid || !authToken || !fromNumber) {
+    return false;
+  }
+
+  const message = [
+    `New Lulu Ridge order ${order.orderId}`,
+    `Quantity: ${order.quantity}`,
+    `Name: ${order.customerName}`,
+    `Shipping address: ${order.shippingAddress}`,
+  ].join('\n');
+  const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(accountSid)}/Messages.json`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString('base64')}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({ To: orderNotificationNumber, From: fromNumber, Body: message }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`SMS provider returned ${response.status}.`);
+  }
+
+  return true;
+}
 
 function signPayload(payload) {
   return crypto.createHmac('sha256', APP_SECRET).update(JSON.stringify(payload)).digest('hex');
@@ -28,12 +60,13 @@ app.get('/health', (req, res) => {
   res.json({ ok: true });
 });
 
-app.post('/api/create-order', (req, res) => {
-  const { quantity = 1, customerName = '', customerEmail = '', paymentMethod = 'manual', isSubscription = false, subscriptionType = '', monthlyPrice = '' } = req.body || {};
+app.post('/api/create-order', async (req, res) => {
+  const { quantity = 1, customerName = '', customerAge = '', customerEmail = '', shippingAddress = '', paymentMethod = 'manual', isSubscription = false, subscriptionType = '', monthlyPrice = '' } = req.body || {};
   const safeQuantity = Math.min(Math.max(Number(quantity) || 1, 1), 10);
+  const safeAge = Number(customerAge);
 
-  if (!customerName || !customerEmail) {
-    return res.status(400).json({ error: 'Name and email are required.' });
+  if (!customerName || !customerEmail || !shippingAddress || !Number.isInteger(safeAge) || safeAge < 1 || safeAge > 120) {
+    return res.status(400).json({ error: 'Name, age, email, and shipping address are required.' });
   }
 
   const total = isSubscription ? Number(monthlyPrice) : getOrderSummary(safeQuantity);
@@ -43,7 +76,9 @@ app.post('/api/create-order', (req, res) => {
   const payload = {
     orderId,
     customerName,
+    customerAge: safeAge,
     customerEmail,
+    shippingAddress,
     quantity: safeQuantity,
     total,
     paymentMethod,
@@ -63,6 +98,13 @@ app.post('/api/create-order', (req, res) => {
 
   orders.set(orderId, record);
 
+  let notificationSent = false;
+  try {
+    notificationSent = await sendOrderSms(record);
+  } catch (error) {
+    console.error('Order SMS failed:', error.message);
+  }
+
   return res.json({
     orderId,
     total,
@@ -72,6 +114,7 @@ app.post('/api/create-order', (req, res) => {
     isSubscription,
     subscriptionType,
     cashAppAccounts,
+    notificationSent,
     signature,
     createdAt,
     expiresAt: record.expiresAt,
@@ -100,12 +143,16 @@ app.post('/api/confirm-order', (req, res) => {
   const expectedSignature = signPayload({
     orderId: record.orderId,
     customerName: record.customerName,
+    customerAge: record.customerAge,
     customerEmail: record.customerEmail,
+    shippingAddress: record.shippingAddress,
     quantity: record.quantity,
     total: record.total,
     paymentMethod: record.paymentMethod,
     paymentCode: record.paymentCode,
     createdAt: record.createdAt,
+    isSubscription: record.isSubscription,
+    subscriptionType: record.subscriptionType,
   });
 
   if (signature !== expectedSignature) {

@@ -1,4 +1,5 @@
 const PRICE_PER_TREAT = 2.5;
+const FALLBACK_CASH_APP_ACCOUNTS = ['$ElikaTacker', '$LathanT150'];
 
 document.addEventListener('DOMContentLoaded', () => {
   const totalElement = document.getElementById('payment-total');
@@ -10,6 +11,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (oldButtonAmount) {
     oldButtonAmount.remove();
+  }
+
+  try {
+    const savedDetails = JSON.parse(sessionStorage.getItem('luluRidgeCustomerDetails') || 'null');
+    if (savedDetails) {
+      document.getElementById('customer-name').value = savedDetails.name || '';
+      document.getElementById('customer-age').value = savedDetails.age || '';
+      document.getElementById('customer-email').value = savedDetails.email || '';
+      document.getElementById('shipping-address').value = savedDetails.address || '';
+    }
+  } catch (error) {
+    console.warn('Saved order details could not be loaded.', error);
   }
   
   const isSubscription = params.get('isSubscription') === 'true';
@@ -24,6 +37,43 @@ document.addEventListener('DOMContentLoaded', () => {
   const apiBaseUrl = window.location.hostname === 'localhost' && window.location.port === '8000'
     ? 'http://localhost:3000'
     : '';
+  const isGithubPages = window.location.hostname.endsWith('.github.io');
+
+  function renderCashAppPayments(data, cashAppWindow) {
+    if (!qrCodes) {
+      return;
+    }
+
+    const totalCents = Math.round(Number(data.total) * 100);
+    const firstAmount = Math.floor(totalCents / 2) / 100;
+    const secondAmount = (totalCents - Math.floor(totalCents / 2)) / 100;
+    const amounts = [firstAmount, secondAmount];
+    const accounts = Array.isArray(data.cashAppAccounts) ? data.cashAppAccounts : [];
+
+    if (accounts.length !== 2 || accounts.some((account) => !account)) {
+      qrCodes.hidden = false;
+      qrCodes.innerHTML = '<p class="error-message">Cash App recipients are not configured yet. Please contact us before sending payment.</p>';
+      return;
+    }
+
+    const paymentUrls = accounts.map((account, index) => {
+      const cashtag = account.replace(/^[$@]/, '');
+      const note = `Order ${data.paymentCode} - ${data.quantity} treat(s)`;
+      return `https://cash.app/$${encodeURIComponent(cashtag)}?amount=${amounts[index].toFixed(2)}&note=${encodeURIComponent(note)}`;
+    });
+
+    qrCodes.hidden = false;
+    qrCodes.innerHTML = accounts.map((account, index) => {
+      const qrUrl = `https://quickchart.io/qr?size=240&text=${encodeURIComponent(paymentUrls[index])}`;
+      return `<div class="cashapp-qr"><h2>Send $${amounts[index].toFixed(2)} to ${account}</h2><img src="${qrUrl}" alt="Cash App QR code for ${account}"><a class="nav-link" href="${paymentUrls[index]}" target="_blank" rel="noopener">Open Cash App</a></div>`;
+    }).join('') + (data.url ? `<a class="primary-btn" href="${data.url}">Continue to payment confirmation</a>` : '');
+
+    if (cashAppWindow) {
+      cashAppWindow.location.href = paymentUrls[0];
+    } else if (paymentInstructions) {
+      paymentInstructions.innerHTML += '<br>Allow pop-ups to open Cash App automatically, or use the links below.';
+    }
+  }
 
   if (totalElement) {
     if (isSubscription) {
@@ -48,11 +98,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const submitButton = document.getElementById('checkout-submit-button');
       const errorDiv = document.getElementById('checkout-errors');
       const name = document.getElementById('customer-name').value.trim();
+      const age = Number(document.getElementById('customer-age').value);
       const email = document.getElementById('customer-email').value.trim();
+      const shippingAddress = document.getElementById('shipping-address').value.trim();
       const paymentMethod = document.getElementById('payment-method').value;
 
-      if (!name || !email) {
-        errorDiv.textContent = 'Please enter your name and email.';
+      if (!name || !email || !shippingAddress || !Number.isInteger(age) || age < 1 || age > 120) {
+        errorDiv.textContent = 'Please enter a valid name, age, email, and shipping address.';
         return;
       }
 
@@ -63,6 +115,21 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Starting checkout for', { name, email, paymentMethod, quantity, total, isSubscription, subscriptionType });
 
       try {
+        if (isGithubPages) {
+          const localData = {
+            total,
+            quantity,
+            paymentCode: `WEB-${Date.now().toString(36).toUpperCase()}`,
+            cashAppAccounts: FALLBACK_CASH_APP_ACCOUNTS,
+          };
+          if (paymentInstructions) {
+            paymentInstructions.innerHTML = `<strong>Amount:</strong> $${total.toFixed(2)}<br><strong>Payment code:</strong> ${localData.paymentCode}<br>Cash App opened in a new tab. Scan both QR codes to send the 50/50 split. SMS notifications require the bakery server to be online.`;
+          }
+          renderCashAppPayments(localData, cashAppWindow);
+          submitButton.textContent = 'Pay';
+          return;
+        }
+
         const response = await fetch(`${apiBaseUrl}/api/create-order`, {
           method: 'POST',
           headers: {
@@ -71,7 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({
             quantity,
             customerName: name,
+            customerAge: age,
             customerEmail: email,
+            shippingAddress,
             paymentMethod,
             isSubscription,
             subscriptionType,
@@ -94,35 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
           `;
         }
 
-        if (qrCodes) {
-          const totalCents = Math.round(Number(data.total) * 100);
-          const firstAmount = Math.floor(totalCents / 2) / 100;
-          const secondAmount = (totalCents - Math.floor(totalCents / 2)) / 100;
-          const amounts = [firstAmount, secondAmount];
-          const accounts = Array.isArray(data.cashAppAccounts) ? data.cashAppAccounts : [];
-
-          if (accounts.length !== 2 || accounts.some((account) => !account)) {
-            qrCodes.hidden = false;
-            qrCodes.innerHTML = '<p class="error-message">Cash App recipients are not configured yet. Please contact us before sending payment.</p>';
-          } else {
-            qrCodes.hidden = false;
-            const paymentUrls = accounts.map((account, index) => {
-              const cashtag = account.replace(/^[$@]/, '');
-              return `https://cash.app/$${encodeURIComponent(cashtag)}?amount=${amounts[index].toFixed(2)}&note=${encodeURIComponent(data.paymentCode)}`;
-            });
-
-            qrCodes.innerHTML = accounts.map((account, index) => {
-              const qrUrl = `https://quickchart.io/qr?size=240&text=${encodeURIComponent(paymentUrls[index])}`;
-              return `<div class="cashapp-qr"><h2>Send $${amounts[index].toFixed(2)} to ${account}</h2><img src="${qrUrl}" alt="Cash App QR code for ${account}"><a class="nav-link" href="${paymentUrls[index]}" target="_blank" rel="noopener">Open Cash App</a></div>`;
-            }).join('') + `<a class="primary-btn" href="${data.url}">Continue to payment confirmation</a>`;
-
-            if (cashAppWindow) {
-              cashAppWindow.location.href = paymentUrls[0];
-            } else {
-              paymentInstructions.innerHTML += '<br>Allow pop-ups to open Cash App automatically, or use the links below.';
-            }
-          }
-        }
+        renderCashAppPayments(data, cashAppWindow);
 
         submitButton.textContent = 'Pay';
       } catch (error) {

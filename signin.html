@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Details | Lulu Ridge Rat Bakery</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">Lulu Ridge Rat Bakery</div>
+      <a class="nav-link" href="treats.html">Back to Treats</a>
+    </header>
+
+    <main class="page payment-page">
+      <section class="card payment-card">
+        <p class="eyebrow">Order Details</p>
+        <h1>Sign in to order</h1>
+        <p class="info-message">Enter your details so we can prepare your shipment and send the order notice.</p>
+
+        <form id="signin-form" class="payment-form">
+          <label>
+            Full Name
+            <input type="text" id="customer-name" name="name" autocomplete="name" required />
+          </label>
+
+          <label>
+            Age
+            <input type="number" id="customer-age" name="age" min="1" max="120" autocomplete="off" required />
+          </label>
+
+          <label>
+            Email
+            <input type="email" id="customer-email" name="email" autocomplete="email" required />
+          </label>
+
+          <label>
+            Shipping Address
+            <textarea id="shipping-address" name="address" rows="4" autocomplete="street-address" required></textarea>
+          </label>
+
+          <div id="signin-errors" role="alert" class="error-message"></div>
+          <button type="submit" class="primary-btn">Continue to payment</button>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const signinForm = document.getElementById('signin-form');
+      const signinErrors = document.getElementById('signin-errors');
+
+      signinForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const details = {
+          name: document.getElementById('customer-name').value.trim(),
+          age: Number(document.getElementById('customer-age').value),
+          email: document.getElementById('customer-email').value.trim(),
+          address: document.getElementById('shipping-address').value.trim(),
+        };
+
+        if (!details.name || !details.email || !details.address || !Number.isInteger(details.age) || details.age < 1 || details.age > 120) {
+          signinErrors.textContent = 'Please enter a valid name, age, email, and shipping address.';
+          return;
+        }
+
+        sessionStorage.setItem('luluRidgeCustomerDetails', JSON.stringify(details));
+        const query = params.toString();
+        window.location.href = `payment.html${query ? `?${query}` : ''}`;
+      });
+    </script>
+  </body>
+</html>
