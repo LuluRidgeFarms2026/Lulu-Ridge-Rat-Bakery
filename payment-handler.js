@@ -5,7 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const checkoutForm = document.getElementById('checkout-form');
   const paymentInstructions = document.getElementById('payment-instructions');
   const qrCodes = document.getElementById('cashapp-qr-codes');
+  const oldButtonAmount = document.getElementById('button-amount');
   const params = new URLSearchParams(window.location.search);
+
+  if (oldButtonAmount) {
+    oldButtonAmount.remove();
+  }
   
   const isSubscription = params.get('isSubscription') === 'true';
   const subscriptionType = params.get('subscriptionType');
