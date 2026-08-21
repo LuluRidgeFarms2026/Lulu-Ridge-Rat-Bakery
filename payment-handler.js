@@ -36,14 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const checkoutSubmitButton = document.getElementById('checkout-submit-button');
-  if (checkoutSubmitButton) {
-    const buttonAmount = document.getElementById('button-amount');
-    if (buttonAmount) {
-      buttonAmount.textContent = `$${total.toFixed(2)}`;
-    }
-  }
-
   if (checkoutForm) {
     checkoutForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -113,19 +105,16 @@ document.addEventListener('DOMContentLoaded', () => {
               const paymentUrl = `https://cash.app/$${encodeURIComponent(cashtag)}?amount=${amounts[index].toFixed(2)}&note=${encodeURIComponent(data.paymentCode)}`;
               const qrUrl = `https://quickchart.io/qr?size=240&text=${encodeURIComponent(paymentUrl)}`;
               return `<div class="cashapp-qr"><h2>Send $${amounts[index].toFixed(2)} to ${account}</h2><img src="${qrUrl}" alt="Cash App QR code for ${account}"><a class="nav-link" href="${paymentUrl}" target="_blank" rel="noopener">Open Cash App</a></div>`;
-            }).join('');
+            }).join('') + `<a class="primary-btn" href="${data.url}">Continue to payment confirmation</a>`;
           }
         }
 
-        console.log('Redirecting to:', data.url);
-        setTimeout(() => {
-          window.location.href = data.url;
-        }, 500);
+        submitButton.textContent = 'Pay';
       } catch (error) {
         console.error('Checkout error:', error);
         errorDiv.textContent = error.message || 'Checkout is unavailable right now.';
         submitButton.disabled = false;
-        submitButton.innerHTML = `Pay <span id="button-amount">$${total.toFixed(2)}</span>`;
+        submitButton.textContent = 'Pay';
       }
     });
   }
