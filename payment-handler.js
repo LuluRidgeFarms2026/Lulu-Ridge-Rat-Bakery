@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
       submitButton.disabled = true;
       submitButton.innerHTML = 'Creating secure order...';
       errorDiv.textContent = '';
+      const cashAppWindow = window.open('', 'lulu-ridge-cashapp');
       console.log('Starting checkout for', { name, email, paymentMethod, quantity, total, isSubscription, subscriptionType });
 
       try {
@@ -105,12 +106,21 @@ document.addEventListener('DOMContentLoaded', () => {
             qrCodes.innerHTML = '<p class="error-message">Cash App recipients are not configured yet. Please contact us before sending payment.</p>';
           } else {
             qrCodes.hidden = false;
-            qrCodes.innerHTML = accounts.map((account, index) => {
+            const paymentUrls = accounts.map((account, index) => {
               const cashtag = account.replace(/^[$@]/, '');
-              const paymentUrl = `https://cash.app/$${encodeURIComponent(cashtag)}?amount=${amounts[index].toFixed(2)}&note=${encodeURIComponent(data.paymentCode)}`;
-              const qrUrl = `https://quickchart.io/qr?size=240&text=${encodeURIComponent(paymentUrl)}`;
-              return `<div class="cashapp-qr"><h2>Send $${amounts[index].toFixed(2)} to ${account}</h2><img src="${qrUrl}" alt="Cash App QR code for ${account}"><a class="nav-link" href="${paymentUrl}" target="_blank" rel="noopener">Open Cash App</a></div>`;
+              return `https://cash.app/$${encodeURIComponent(cashtag)}?amount=${amounts[index].toFixed(2)}&note=${encodeURIComponent(data.paymentCode)}`;
+            });
+
+            qrCodes.innerHTML = accounts.map((account, index) => {
+              const qrUrl = `https://quickchart.io/qr?size=240&text=${encodeURIComponent(paymentUrls[index])}`;
+              return `<div class="cashapp-qr"><h2>Send $${amounts[index].toFixed(2)} to ${account}</h2><img src="${qrUrl}" alt="Cash App QR code for ${account}"><a class="nav-link" href="${paymentUrls[index]}" target="_blank" rel="noopener">Open Cash App</a></div>`;
             }).join('') + `<a class="primary-btn" href="${data.url}">Continue to payment confirmation</a>`;
+
+            if (cashAppWindow) {
+              cashAppWindow.location.href = paymentUrls[0];
+            } else {
+              paymentInstructions.innerHTML += '<br>Allow pop-ups to open Cash App automatically, or use the links below.';
+            }
           }
         }
 
