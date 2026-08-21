@@ -45,6 +45,45 @@ async function sendOrderSms(order) {
   return true;
 }
 
+async function sendKlaviyoOrderEvent(order) {
+  const apiKey = process.env.KLAVIYO_PRIVATE_API_KEY;
+  const profileId = process.env.KLAVIYO_NOTIFICATION_PROFILE_ID;
+
+  if (!apiKey || !profileId) {
+    return false;
+  }
+
+  const response = await fetch('https://a.klaviyo.com/api/events', {
+    method: 'POST',
+    headers: {
+      Authorization: `Klaviyo-API-Key ${apiKey}`,
+      'content-type': 'application/json',
+      revision: '2024-10-15',
+    },
+    body: JSON.stringify({
+      data: {
+        type: 'event',
+        attributes: {
+          metric: { data: { type: 'metric', attributes: { name: 'Order Created' } } },
+          properties: {
+            order_id: order.orderId,
+            quantity: order.quantity,
+            customer_name: order.customerName,
+            shipping_address: order.shippingAddress,
+          },
+          profile: { data: { type: 'profile', id: profileId } },
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Klaviyo returned ${response.status}.`);
+  }
+
+  return true;
+}
+
 function signPayload(payload) {
   return crypto.createHmac('sha256', APP_SECRET).update(JSON.stringify(payload)).digest('hex');
 }
@@ -61,12 +100,12 @@ app.get('/health', (req, res) => {
 });
 
 app.post('/api/create-order', async (req, res) => {
-  const { quantity = 1, customerName = '', customerAge = '', customerEmail = '', shippingAddress = '', paymentMethod = 'manual', isSubscription = false, subscriptionType = '', monthlyPrice = '' } = req.body || {};
+  const { quantity = 1, customerName = '', customerAge = '', customerEmail = '', shippingAddress = '', smsConsent = false, paymentMethod = 'manual', isSubscription = false, subscriptionType = '', monthlyPrice = '' } = req.body || {};
   const safeQuantity = Math.min(Math.max(Number(quantity) || 1, 1), 10);
   const safeAge = Number(customerAge);
 
-  if (!customerName || !customerEmail || !shippingAddress || !Number.isInteger(safeAge) || safeAge < 1 || safeAge > 120) {
-    return res.status(400).json({ error: 'Name, age, email, and shipping address are required.' });
+  if (!customerName || !customerEmail || !shippingAddress || !smsConsent || !Number.isInteger(safeAge) || safeAge < 1 || safeAge > 120) {
+    return res.status(400).json({ error: 'Name, age, email, shipping address, and SMS consent are required.' });
   }
 
   const total = isSubscription ? Number(monthlyPrice) : getOrderSummary(safeQuantity);
@@ -79,6 +118,7 @@ app.post('/api/create-order', async (req, res) => {
     customerAge: safeAge,
     customerEmail,
     shippingAddress,
+    smsConsent: true,
     quantity: safeQuantity,
     total,
     paymentMethod,
@@ -104,6 +144,12 @@ app.post('/api/create-order', async (req, res) => {
   } catch (error) {
     console.error('Order SMS failed:', error.message);
   }
+  let klaviyoEventSent = false;
+  try {
+    klaviyoEventSent = await sendKlaviyoOrderEvent(record);
+  } catch (error) {
+    console.error('Klaviyo order event failed:', error.message);
+  }
 
   return res.json({
     orderId,
@@ -115,6 +161,7 @@ app.post('/api/create-order', async (req, res) => {
     subscriptionType,
     cashAppAccounts,
     notificationSent,
+    klaviyoEventSent,
     signature,
     createdAt,
     expiresAt: record.expiresAt,
@@ -146,6 +193,7 @@ app.post('/api/confirm-order', (req, res) => {
     customerAge: record.customerAge,
     customerEmail: record.customerEmail,
     shippingAddress: record.shippingAddress,
+    smsConsent: record.smsConsent,
     quantity: record.quantity,
     total: record.total,
     paymentMethod: record.paymentMethod,

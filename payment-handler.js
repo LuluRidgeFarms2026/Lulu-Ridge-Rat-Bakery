@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('customer-age').value = savedDetails.age || '';
       document.getElementById('customer-email').value = savedDetails.email || '';
       document.getElementById('shipping-address').value = savedDetails.address || '';
+      document.getElementById('sms-consent').checked = savedDetails.smsConsent === true;
     }
   } catch (error) {
     console.warn('Saved order details could not be loaded.', error);
@@ -101,9 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const age = Number(document.getElementById('customer-age').value);
       const email = document.getElementById('customer-email').value.trim();
       const shippingAddress = document.getElementById('shipping-address').value.trim();
+      const smsConsent = document.getElementById('sms-consent').checked;
       const paymentMethod = document.getElementById('payment-method').value;
 
-      if (!name || !email || !shippingAddress || !Number.isInteger(age) || age < 1 || age > 120) {
+      if (!name || !email || !shippingAddress || !smsConsent || !Number.isInteger(age) || age < 1 || age > 120) {
         errorDiv.textContent = 'Please enter a valid name, age, email, and shipping address.';
         return;
       }
@@ -141,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             customerAge: age,
             customerEmail: email,
             shippingAddress,
+            smsConsent,
             paymentMethod,
             isSubscription,
             subscriptionType,

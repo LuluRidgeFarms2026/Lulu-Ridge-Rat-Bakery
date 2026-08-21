@@ -329,6 +329,18 @@ label {
   font-weight: 600;
 }
 
+.consent-check {
+  display: flex;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.65rem;
+}
+
+.consent-check input {
+  width: auto;
+  margin-top: 0.35rem;
+}
+
 input {
   width: 100%;
   padding: 0.85rem 1rem;

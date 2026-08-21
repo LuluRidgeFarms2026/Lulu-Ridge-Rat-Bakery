@@ -39,6 +39,11 @@
             <textarea id="shipping-address" name="address" rows="4" autocomplete="street-address" required></textarea>
           </label>
 
+          <label class="consent-check">
+            <input type="checkbox" id="sms-consent" name="smsConsent" required />
+            I agree to receive order updates by SMS.
+          </label>
+
           <div id="signin-errors" role="alert" class="error-message"></div>
           <button type="submit" class="primary-btn">Continue to payment</button>
         </form>
@@ -58,9 +63,10 @@
           age: Number(document.getElementById('customer-age').value),
           email: document.getElementById('customer-email').value.trim(),
           address: document.getElementById('shipping-address').value.trim(),
+          smsConsent: document.getElementById('sms-consent').checked,
         };
 
-        if (!details.name || !details.email || !details.address || !Number.isInteger(details.age) || details.age < 1 || details.age > 120) {
+        if (!details.name || !details.email || !details.address || !details.smsConsent || !Number.isInteger(details.age) || details.age < 1 || details.age > 120) {
           signinErrors.textContent = 'Please enter a valid name, age, email, and shipping address.';
           return;
         }
