@@ -13,6 +13,7 @@
     </header>
 
     <main class="page payment-page">
+      <div class="payment-banner" role="status">We Accept CashApp Payments Only Sorry But this will Hopefully Change Soon</div>
       <section class="card payment-card">
         <p class="eyebrow">Secure Local Checkout</p>
         <h1>PumpkinMeal Bites</h1>
@@ -33,15 +34,15 @@
             Payment Method
             <select id="payment-method" name="paymentMethod">
               <option value="cashapp">Cash App</option>
-              <option value="cashapp">Cash App</option>
-              <option value="cashapp">Cash App</option>
             </select>
           </label>
 
           <div id="checkout-errors" role="alert" class="error-message"></div>
           <div id="payment-instructions" class="info-message"></div>
-          <button type="submit" class="primary-btn" id="checkout-submit-button">PAY <span id="button-amount">$2.50</span></button>
+          <button type="submit" class="primary-btn" id="checkout-submit-button">Pay <span id="button-amount">$2.50</span></button>
         </form>
+
+        <div id="cashapp-qr-codes" class="cashapp-qr-codes" hidden></div>
       </section>
     </main>
 

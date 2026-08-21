@@ -7,6 +7,10 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 const APP_SECRET = process.env.APP_SECRET || 'dev-local-payment-secret-change-me';
+const cashAppAccounts = [
+  process.env.CASHAPP_ACCOUNT_ONE || '$ElikaTacker',
+  process.env.CASHAPP_ACCOUNT_TWO || '$LathanT150',
+];
 const orders = new Map();
 
 function signPayload(payload) {
@@ -67,6 +71,7 @@ app.post('/api/create-order', (req, res) => {
     paymentMethod,
     isSubscription,
     subscriptionType,
+    cashAppAccounts,
     signature,
     createdAt,
     expiresAt: record.expiresAt,

@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalElement = document.getElementById('payment-total');
   const checkoutForm = document.getElementById('checkout-form');
   const paymentInstructions = document.getElementById('payment-instructions');
+  const qrCodes = document.getElementById('cashapp-qr-codes');
   const params = new URLSearchParams(window.location.search);
   
   const isSubscription = params.get('isSubscription') === 'true';
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isSubscription) {
       paymentInstructions.innerHTML = `<strong>Subscription:</strong> Your payment will recur monthly. Send the total to the Cash App account below using the payment code shown after checkout. Cancel anytime.`;
     } else {
-      paymentInstructions.innerHTML = 'Send the total to the Cash App account below using the payment code shown after checkout. This keeps every payment routed to one Cash App destination.';
+      paymentInstructions.innerHTML = 'After you click Pay, scan both QR codes and send the displayed amount to each Cash App account.';
     }
   }
 
@@ -91,8 +92,29 @@ document.addEventListener('DOMContentLoaded', () => {
           paymentInstructions.innerHTML = `
             <strong>Amount:</strong> $${Number(data.total).toFixed(2)}<br>
             <strong>Payment code:</strong> ${data.paymentCode}<br>
-            Send the full amount and include the payment code in the note.${isSubscription ? '<br><strong>Note:</strong> This will recur monthly.' : ''}
+            Send both amounts and include the payment code in each note.${isSubscription ? '<br><strong>Note:</strong> This will recur monthly.' : ''}
           `;
+        }
+
+        if (qrCodes) {
+          const totalCents = Math.round(Number(data.total) * 100);
+          const firstAmount = Math.floor(totalCents / 2) / 100;
+          const secondAmount = (totalCents - Math.floor(totalCents / 2)) / 100;
+          const amounts = [firstAmount, secondAmount];
+          const accounts = Array.isArray(data.cashAppAccounts) ? data.cashAppAccounts : [];
+
+          if (accounts.length !== 2 || accounts.some((account) => !account)) {
+            qrCodes.hidden = false;
+            qrCodes.innerHTML = '<p class="error-message">Cash App recipients are not configured yet. Please contact us before sending payment.</p>';
+          } else {
+            qrCodes.hidden = false;
+            qrCodes.innerHTML = accounts.map((account, index) => {
+              const cashtag = account.replace(/^[$@]/, '');
+              const paymentUrl = `https://cash.app/$${encodeURIComponent(cashtag)}?amount=${amounts[index].toFixed(2)}&note=${encodeURIComponent(data.paymentCode)}`;
+              const qrUrl = `https://quickchart.io/qr?size=240&text=${encodeURIComponent(paymentUrl)}`;
+              return `<div class="cashapp-qr"><h2>Send $${amounts[index].toFixed(2)} to ${account}</h2><img src="${qrUrl}" alt="Cash App QR code for ${account}"><a class="nav-link" href="${paymentUrl}" target="_blank" rel="noopener">Open Cash App</a></div>`;
+            }).join('');
+          }
         }
 
         console.log('Redirecting to:', data.url);
@@ -103,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Checkout error:', error);
         errorDiv.textContent = error.message || 'Checkout is unavailable right now.';
         submitButton.disabled = false;
-        submitButton.innerHTML = `PAY <span id="button-amount">$${total.toFixed(2)}</span>`;
+        submitButton.innerHTML = `Pay <span id="button-amount">$${total.toFixed(2)}</span>`;
       }
     });
   }

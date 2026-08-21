@@ -252,6 +252,19 @@ label {
   padding-top: 2rem;
 }
 
+.payment-banner {
+  width: min(560px, 92vw);
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid #e7c077;
+  border-radius: 14px;
+  background: #f7d8a4;
+  color: var(--primary-dark);
+  text-align: center;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
 .payment-card {
   width: min(560px, 92vw);
   padding: 2rem;
@@ -280,6 +293,34 @@ label {
 .payment-form {
   display: grid;
   gap: 1rem;
+}
+
+.cashapp-qr-codes {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.cashapp-qr {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fcf6ef;
+  text-align: center;
+}
+
+.cashapp-qr h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.cashapp-qr img {
+  width: 240px;
+  max-width: 100%;
+  border-radius: 8px;
 }
 
 label {
